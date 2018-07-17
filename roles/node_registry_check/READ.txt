@@ -1,0 +1,4 @@
+#########
+在项目vars/main.yml下面增加要检测的registry的ip和端口
+执行 ansible-playbook -i inventory/inventory playbooks/node_registry_check.yaml 即可
+

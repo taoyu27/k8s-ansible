@@ -1,0 +1,28 @@
+! Configuration File for keepalived
+global_defs {
+    router_id LVS_DEVEL
+}
+vrrp_script chk_nginx {
+    script "/etc/keepalived/check_nginx.sh"
+    interval 2
+    weight -5
+    fall 3  
+    rise 2
+}
+vrrp_instance VI_1 {
+    state {{ STATE }}
+    interface {{ INTERFACE_NAME }}
+    virtual_router_id 43
+    priority {{ PRI }}
+    advert_int 1
+    authentication {
+        auth_type PASS
+        auth_pass 571f97b2
+    }
+    virtual_ipaddress {
+        {{ master_vip }}
+    }
+    track_script {
+         chk_nginx
+    }
+}

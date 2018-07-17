@@ -1,0 +1,22 @@
+$TTL 3H
+@       IN SOA  @ rname.invalid. (
+                                        0       ; serial
+                                        1D      ; refresh
+                                        1H      ; retry
+                                        1W      ; expire
+                                        3H )    ; minimum
+        NS      @
+        A       127.0.0.1
+        AAAA    ::1
+
+
+*          IN      A       172.16.71.234
+wiki       IN      A       172.16.60.13
+jira       IN      A       172.16.80.81
+registry   IN      A       172.16.63.198
+draft      IN      A       172.16.101.237
+svn        IN      A       172.16.101.137
+gitlab     IN      A       172.16.60.11
+mongo01    IN      A       172.16.63.208
+mongo02    IN      A       172.16.74.154
+mongo03    IN      A       172.16.74.158

@@ -1,0 +1,52 @@
+---
+#check  k8s
+
+
+- name: wirte nginx-deployment yaml
+  template: src=nginx-deployment.yaml.j2 dest=/tmp/nginx-deployment.yaml
+
+- name: wirte nginx-svc yaml
+  template: src=nginx-svc.yaml.j2 dest=/tmp/nginx-svc.yaml
+
+- name: create deployment demo
+  shell: kubectl create -f /tmp/nginx-deployment.yaml
+  register: deployment_create_result
+  ignore_errors: True
+- name: show check info
+  debug: var=deployment_create_result.stdout_lines verbosity=0
+
+- name: create service demo
+  shell: kubectl create -f /tmp/nginx-svc.yaml
+  register: service_create_result
+  ignore_errors: True
+- name: show check info
+  debug: var=service_create_result.stdout_lines verbosity=0
+
+- name: sleep  15s
+  shell: sleep 15
+
+
+- name: run check module to ckeck deployment demo
+  deployment: get_facts=yes
+  register: dm_ckeck_result
+  ignore_errors: True
+- name: show check deployment info
+  debug: var=dm_ckeck_result verbosity=0
+
+
+
+- name: clean deployment demo
+  shell: kubectl delete -f  /tmp/nginx-deployment.yaml
+
+- name: run check module to ckeck service demo
+  k8s_service: get_facts=yes
+  register: service_ckeck_result
+  ignore_errors: True
+- name: show check service info
+  debug: var=service_ckeck_result verbosity=0
+
+
+- name: clean service demo
+  shell: kubectl delete -f  /tmp/nginx-svc.yaml
+
+

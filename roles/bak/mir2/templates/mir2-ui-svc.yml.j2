@@ -1,0 +1,24 @@
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: mir2-ui-svc
+  namespace: {{build_in_namespace}}
+  labels:
+    name: mir2-ui-svc
+spec:
+  ports:
+  - name: tcp-80
+    protocol: TCP
+    port: 80
+    targetPort: 80
+  {% if nodePort == true %}
+  nodePort: {{ ui_nodeport }}
+  {% endif %}
+selector:
+    app: mir2-ui-deployment-tmpl
+  sessionAffinity: ClientIP
+{% if nodePort == true %}
+  type: NodePort
+{% endif %}

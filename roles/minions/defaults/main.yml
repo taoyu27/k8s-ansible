@@ -1,0 +1,5 @@
+# Kubernetes
+
+# Kubernetes addons列表, 空列表为不启用任何addon
+enabled_addons: []
+

@@ -1,0 +1,19 @@
+---
+-
+  name: "copy script to hosts"
+  copy: src="tc_node_registry_check.sh" dest="/tmp/tc_node_registry_check.sh" owner=root group=root mode=700
+- 
+  name: "copy for script to hosts"
+  copy: src="tc_for.sh" dest="/tmp/tc_for.sh" owner=root group=root mode=700
+  tags: copy_script
+-
+  name: var copy 
+  shell: echo "registry_ip={{registry_ip}}" > /tmp/tc_registry_ip.txt && echo "registry_port={{registry_port}}" >> /tmp/tc_registry_ip.txt
+-
+  script: /usr/bin/bash /tmp/tc_for.sh
+  register: telnet_result
+  ignore_errors: true
+- 
+  name: "display telnet result"
+  debug: msg="{{ telnet_result['stdout'] }}"
+  ignore_errors: True

@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mir2-manager-configmap
+  namespace: {{build_in_namespace}}
+data:
+  application.yml: |-
+    spring:
+      rabbitmq:
+        addresses: {{registry_host}}
+        port: 5672
+        username: {{RABBITMQ_USERNAME}}
+        password: {{RABBITMQ_PASSWORD}}
+        virtual-host: mir2-dev
+      datasource:
+        url: jdbc:mysql://{{registry_host}}:3306/mir2?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&allowMultiQueries=true&useSSL=false
+        username: root
+        password: root123
+      data:
+        mongodb:
+          uri: mongodb://{{mongo_user}}:{{mongo_passwd}}@{{ansible_default_ipv4.address}}:{{mongo_nodeport}}/{{MONGO_INITDB_DATABASE}}?readPreference=secondaryPreferred
+
+    harbor:
+      config:
+        username: {{registr_user}}
+        password: {{registry_ui_passwd}}
+        protocol: http://
+        registry: {{registry_host}}
+    app:
+      scheduler:
+        name: manager-dev

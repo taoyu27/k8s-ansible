@@ -1,0 +1,246 @@
+
+############################################################################################################################################
+# download images into registry
+############################################################################################################################################
+
+
+- name: download cni images
+  get_url:
+    url: "http://{% if reposerver %}{{ reposerver }}{% else %}{{ hostvars[groups['registries'][0]]['ansible_host']}}{% endif %}:82/latest/mir2/packages/cni-{{cni_version}}.tar"
+    dest: /tmp/registry/cni-{{cni_version}}.tar
+    mode: 0440
+
+- name: download kube-policy-controller images
+  get_url:
+    url: "http://{% if reposerver %}{{ reposerver }}{% else %}{{ hostvars[groups['registries'][0]]['ansible_host']}}{% endif %}:82/latest/mir2/packages/kube-policy-controller-{{kube_policy_controller_version}}.tar"
+    dest: /tmp/registry/kube-policy-controller-{{kube_policy_controller_version}}.tar
+    mode: 0440
+
+- name: download node images
+  get_url:
+    url: "http://{% if reposerver %}{{ reposerver }}{% else %}{{ hostvars[groups['registries'][0]]['ansible_host']}}{% endif %}:82/latest/mir2/packages/node-{{node_version}}.tar"
+    dest: /tmp/registry/node-{{node_version}}.tar
+    mode: 0440
+
+
+- name: download hyperkube images
+  get_url:
+    url: "http://{% if reposerver %}{{ reposerver }}{% else %}{{ hostvars[groups['registries'][0]]['ansible_host']}}{% endif %}:82/latest/mir2/packages/hyperkube-{{k8s_version}}.tar"
+    dest: /tmp/registry/hyperkube-{{k8s_version}}.tar
+    mode: 0440
+
+- name: download tiller images
+  get_url:
+    url: "http://{% if reposerver %}{{ reposerver }}{% else %}{{ hostvars[groups['registries'][0]]['ansible_host']}}{% endif %}:82/latest/mir2/packages/tiller-{{helm_version}}.tar"
+    dest: /tmp/registry/tiller-{{helm_version}}.tar
+    mode: 0440
+
+- name: download pause images
+  get_url:
+    url: "http://{% if reposerver %}{{ reposerver }}{% else %}{{ hostvars[groups['registries'][0]]['ansible_host']}}{% endif %}:82/latest/mir2/packages/pause-amd64-{{pause_amd64_version}}.tar"
+    dest: /tmp/registry/pause-amd64-{{pause_amd64_version}}.tar
+    mode: 0440
+
+- name: download busybox images
+  get_url:
+    url: "http://{% if reposerver %}{{ reposerver }}{% else %}{{ hostvars[groups['registries'][0]]['ansible_host']}}{% endif %}:82/latest/mir2/packages/busybox.tar"
+    dest: /tmp/registry/busybox.tar
+    mode: 0440
+
+- name: download nginx-ingress images
+  get_url:
+    url: "http://{% if reposerver %}{{ reposerver }}{% else %}{{ hostvars[groups['registries'][0]]['ansible_host']}}{% endif %}:82/latest/mir2/packages/nginx-ingress-{{nginx_ingress_version}}.tar"
+    dest: /tmp/registry/nginx-ingress-{{nginx_ingress_version}}.tar
+    mode: 0440
+
+- name: download nginx-demo images
+  get_url:
+    url: "http://{% if reposerver %}{{ reposerver }}{% else %}{{ hostvars[groups['registries'][0]]['ansible_host']}}{% endif %}:82/latest/mir2/packages/nginx-latest.tar"
+    dest: /tmp/registry/nginx-latest.tar
+    mode: 0440
+
+
+- name: download kube dns sidecar images
+  get_url:
+    url: "http://{% if reposerver %}{{ reposerver }}{% else %}{{ hostvars[groups['registries'][0]]['ansible_host']}}{% endif %}:82/latest/mir2/packages/dns_sidecar.tar"
+    dest: /tmp/registry/dns_sidecar.tar
+    mode: 0440
+
+
+- name: download kube_dns_dnsmasq images
+  get_url:
+    url: "http://{% if reposerver %}{{ reposerver }}{% else %}{{ hostvars[groups['registries'][0]]['ansible_host']}}{% endif %}:82/latest/mir2/packages/kube_dns_dnsmasq.tar"
+    dest: /tmp/registry/kube_dns_dnsmasq.tar
+    mode: 0440
+
+- name: download kube dns  images
+  get_url:
+    url: "http://{% if reposerver %}{{ reposerver }}{% else %}{{ hostvars[groups['registries'][0]]['ansible_host']}}{% endif %}:82/latest/mir2/packages/kube_dns.tar"
+    dest: /tmp/registry/kube_dns.tar
+    mode: 0440
+
+- name: download rabbitmq images
+  get_url:
+    url: "http://{% if reposerver %}{{ reposerver }}{% else %}{{ hostvars[groups['registries'][0]]['ansible_host']}}{% endif %}:82/latest/mir2/packages/rabbitmq-{{rabbitmq_version}}.tar"
+    dest: /tmp/registry/rabbitmq-{{rabbitmq_version}}.tar
+    mode: 0440
+
+- name: download mongo images
+  get_url:
+    url: "http://{% if reposerver %}{{ reposerver }}{% else %}{{ hostvars[groups['registries'][0]]['ansible_host']}}{% endif %}:82/latest/mir2/packages/mongodb-{{mongo_version}}.tar"
+    dest: /tmp/registry/mongodb-{{mongo_version}}.tar
+    mode: 0440
+
+
+
+############################################################################################################################################
+# load images into registry
+############################################################################################################################################
+
+
+- name: load images cni
+  shell: docker load < /tmp/registry/cni-{{cni_version}}.tar
+
+- name: load images kube-policy-controller
+  shell: docker load < /tmp/registry/kube-policy-controller-{{kube_policy_controller_version}}.tar
+
+- name: load images
+  shell: docker load < /tmp/registry/node-{{node_version}}.tar
+
+- name: load images node
+  shell: docker load < /tmp/registry/hyperkube-{{k8s_version}}.tar
+
+- name: load images tiller
+  shell: docker load < /tmp/registry/tiller-{{helm_version}}.tar
+
+- name: load images pause
+  shell: docker load < /tmp/registry/pause-amd64-{{pause_amd64_version}}.tar
+
+- name: load images busybox
+  shell: docker load < /tmp/registry/busybox.tar
+
+- name: load images busybox
+  shell: docker load < /tmp/registry/nginx-ingress-{{nginx_ingress_version}}.tar
+
+- name: load images nginx
+  shell: docker load < /tmp/registry/nginx-latest.tar
+
+
+- name: load images dns_sidecar
+  shell: docker load < /tmp/registry/dns_sidecar.tar
+
+- name: load images kube_dns_dnsmasq
+  shell: docker load < /tmp/registry/kube_dns_dnsmasq.tar
+
+- name: load images kube_dns
+  shell: docker load < /tmp/registry/kube_dns.tar
+
+
+- name: load images rabbitmq
+  shell: docker load < /tmp/registry/rabbitmq-{{rabbitmq_version}}.tar
+
+
+- name: load images mongo
+  shell: docker load < /tmp/registry/mongodb-{{mongo_version}}.tar
+
+
+
+############################################################################################################################################
+# tag images 
+############################################################################################################################################
+
+
+- name: docker tag images cni
+  shell: docker tag 172.16.80.94/mir/cni:{{cni_version}} {{ansible_default_ipv4.address}}/library/cni:{{cni_version}}
+
+- name: docker tag images node
+  shell: docker tag 172.16.80.94/mir/node:{{node_version}} {{ansible_default_ipv4.address}}/library/node:{{node_version}}
+
+- name: docker tag images kube-policy-controller
+  shell: docker tag 172.16.80.94/mir/kube-policy-controller:{{kube_policy_controller_version}} {{ansible_default_ipv4.address}}/library/kube-policy-controller:{{kube_policy_controller_version}}
+
+- name: docker tag images hyperkube
+  shell: docker tag gcr.io/google_containers/hyperkube:{{k8s_version}} {{ansible_default_ipv4.address}}/library/hyperkube:{{k8s_version}}
+
+- name: docker tag images tiller
+  shell: docker tag gcr.io/kubernetes-helm/tiller:{{helm_version}} {{ansible_default_ipv4.address}}/library/tiller:{{ helm_version }}
+
+- name: docker tag images pause-amd64
+  shell: docker tag 172.16.80.94/mir/pause-amd64:3.0 {{ansible_default_ipv4.address}}/library/pause-amd64:{{ pause_amd64_version }}
+
+- name: docker tag images busybox
+  shell: docker tag busybox {{ansible_default_ipv4.address}}/library/busybox
+
+- name: docker tag images nginx-ingress
+  shell: docker tag 172.16.63.198/common/nginx-ingress:{{nginx_ingress_version}} {{ansible_default_ipv4.address}}/library/nginx-ingress:{{ nginx_ingress_version }}
+
+- name: docker tag images nginx
+  shell: docker tag nginx:latest {{ansible_default_ipv4.address}}/library/nginx:latest
+
+- name: docker tag images dns_sidecar
+  shell: docker tag 172.16.63.198/kubernetes/k8s-dns-sidecar-amd64:1.14.2 {{ansible_default_ipv4.address}}/library/k8s-dns-sidecar-amd64:1.14.2
+
+- name: docker tag images kube_dns
+  shell: docker tag 172.16.63.198/kubernetes/k8s-dns-kube-dns-amd64:1.14.2  {{ansible_default_ipv4.address}}/library/k8s-dns-kube-dns-amd64:1.14.2
+
+- name: docker tag images kube_dns_dnsmasq
+  shell: docker tag 172.16.63.198/kubernetes/k8s-dns-dnsmasq-nanny-amd64:1.14.2  {{ansible_default_ipv4.address}}/library/k8s-dns-dnsmasq-nanny-amd64:1.14.2
+  
+- name: docker tag images rabbitmq
+  shell: docker tag 172.16.71.199/common/rabbitmq:{{rabbitmq_version}} {{ansible_default_ipv4.address}}/library/rabbitmq:{{rabbitmq_version}}
+
+- name: docker tag images mongo
+  shell: docker tag mongodb:{{mongo_version}} {{ansible_default_ipv4.address}}/library/mongodb:{{mongo_version}}
+
+
+
+- name: login registry
+  shell: docker login {{ansible_default_ipv4.address}} -u="admin" -p="{{registry_ui_passwd}}"
+
+
+############################################################################################################################################
+# push images into registry
+############################################################################################################################################
+
+- name: docker push image
+  shell: docker push  {{ansible_default_ipv4.address}}/library/cni:{{ cni_version }}
+
+- name: docker push images node
+  shell: docker push  {{ansible_default_ipv4.address}}/library/node:{{node_version}}
+
+- name: docker push images kube-policy-controller
+  shell: docker push {{ansible_default_ipv4.address}}/library/kube-policy-controller:{{kube_policy_controller_version}}
+
+- name: docker push images hyperkube
+  shell: docker push  {{ansible_default_ipv4.address}}/library/hyperkube:{{k8s_version}}
+
+- name: docker push images tiller
+  shell: docker push  {{ansible_default_ipv4.address}}/library/tiller:{{ helm_version }}
+
+- name: docker push images pause-amd64
+  shell: docker push {{ansible_default_ipv4.address}}/library/pause-amd64:{{ pause_amd64_version }}
+
+- name: docker push images busybox
+  shell: docker push  {{ansible_default_ipv4.address}}/library/busybox
+
+- name: docker push images nginx-ingress
+  shell: docker push  {{ansible_default_ipv4.address}}/library/nginx-ingress:{{nginx_ingress_version}}
+
+- name: docker push images nginx
+  shell: docker push  {{ansible_default_ipv4.address}}/library/nginx:latest
+
+- name: docker push images dns_sidecar
+  shell: docker push {{ansible_default_ipv4.address}}/library/k8s-dns-sidecar-amd64:1.14.2
+
+- name: docker push images kube_dns
+  shell: docker push {{ansible_default_ipv4.address}}/library/k8s-dns-kube-dns-amd64:1.14.2
+
+- name: docker push images kube_dns_dnsmasq
+  shell: docker push {{ansible_default_ipv4.address}}/library/k8s-dns-dnsmasq-nanny-amd64:1.14.2
+
+- name: docker push images rabbitmq
+  shell: docker push  {{ansible_default_ipv4.address}}/library/rabbitmq:{{rabbitmq_version}}
+
+- name: docker push images mongo
+  shell: docker push {{ansible_default_ipv4.address}}/library/mongodb:{{mongo_version}}
+

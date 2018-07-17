@@ -1,0 +1,4 @@
+---
+- hosts: registries
+  roles:
+    - harbor-lvm

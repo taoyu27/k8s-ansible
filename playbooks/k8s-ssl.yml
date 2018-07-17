@@ -1,0 +1,9 @@
+---
+
+- hosts: masters
+  roles:
+    - k8s-ssl
+
+- hosts: minions
+  roles:
+    - k8s-ssl

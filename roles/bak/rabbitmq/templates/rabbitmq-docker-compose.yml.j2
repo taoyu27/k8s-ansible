@@ -1,0 +1,14 @@
+version: '2'
+
+services:
+  stats:
+    image: {{registry_host}}/library/rabbitmq:{{rabbitmq_version}}
+    environment:
+      - RABBITMQ_USERNAME={{RABBITMQ_USERNAME}}
+      - RABBITMQ_PASSWORD={{RABBITMQ_PASSWORD}}
+      - RABBITMQ_NODE_TYPE=stats
+      - RABBITMQ_ERLANG_COOKIE=s3cr3tc00ki3
+      - RABBITMQ_VHOST=mir2-dev
+    ports:
+      - '15672:15672'
+      - '5672:5672'

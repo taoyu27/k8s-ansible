@@ -1,0 +1,14 @@
+---
+
+- hosts: machines
+  roles:
+    - hostnames
+
+- hosts: add_minions
+  roles:
+    - hostnames
+    - ssh
+    - chrony-client
+    - k8s-ssl
+    - kubernetes
+    - minions

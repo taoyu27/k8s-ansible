@@ -1,0 +1,13 @@
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: nginx
+spec:
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: {{ registry_host }}{% if registry_port != 80 %}:{{ registry_port }}{% endif %}/common/nginx:1.8.1

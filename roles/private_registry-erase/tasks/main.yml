@@ -1,0 +1,14 @@
+---
+
+- name:  stop harbor
+  shell: cd /root/harbor/   && docker-compose -f ./docker-compose.yml  down
+  ignore_errors: True
+
+- name: del onex
+  shell: rm -rf /root/harbor/
+  ignore_errors: True
+
+- name: clean rc.local start_common
+  shell: sed -i '/^docker-compose -f \/root\/harbor\/docker-compose.yml.*/d' /etc/rc.local
+  ignore_errors: True
+

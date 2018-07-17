@@ -1,0 +1,4 @@
+---
+- hosts: kubernetes
+  roles:
+    - base-erase

@@ -1,0 +1,30 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: nginx-ingress-{{ build_in_namespace }}
+  namespace: {{ build_in_namespace }}
+  annotations:
+    nginx.org/websocket-services: "mir2-ui-svc"
+spec:
+  rules:
+  - host: mir2-manager.chinacloud.{{build_in_namespace}}
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: mir2-manager-svc
+          servicePort: 8080
+  - host: mir2-handler.chinacloud.{{build_in_namespace}}
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: mir2-handler-svc
+          servicePort: 8080
+  - host: mir2-ui.chinacloud.{{build_in_namespace}}
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: mir2-ui-svc
+          servicePort: 80

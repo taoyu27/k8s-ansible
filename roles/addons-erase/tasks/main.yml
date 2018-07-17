@@ -1,0 +1,33 @@
+---
+
+# 查找到addons的目录列表，但是除去存储部分
+- name: find addons
+  shell: ls  /opt/example_kubernetes/addons/
+  register: command_result
+
+- name: delete istio
+  shell: kubectl delete -f {{ istio_diretory }}/istio.yaml
+  ignore_errors: yes
+
+- name: uninstall sidecar injection configmap
+  shell: kubectl delete -f {{ istio_diretory }}/istio-sidecar-injector-configmap-release.yaml
+  ignore_errors: yes
+
+- name: delete istio-sidecar-injector-with-ca-bundle
+  shell: kubectl delete -f {{ istio_diretory }}/istio-sidecar-injector-with-ca-bundle.yaml
+  ignore_errors: yes
+
+- name: enable namespace to istio-sidecar-injector
+  shell: kubectl label --overwrite namespace default istio-injection=enabled
+  ignore_errors: yes
+
+- name: delete zipkin
+  shell: kubectl delete -f {{isto_4}}/zipkin.yaml | sleep 30
+  ignore_errors: yes
+
+
+#根据目录列表部署服务
+- name: delete addons services
+  shell: kubectl delete -f  /opt/example_kubernetes/addons/{{ item }} | sleep 30
+  with_items: "{{command_result.stdout_lines}}"
+  ignore_errors: yes

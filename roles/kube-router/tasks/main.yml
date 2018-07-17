@@ -1,0 +1,14 @@
+---
+# tasks
+
+- action: shell  curl http://{% if master_vip %}{{ master_vip }}{% else %}{{ hostvars[groups['masters'][0]]['ansible_host']}}{% endif %}:{% if master_vip_port %}{{master_vip_port}}{% else %}8080{% endif %}
+  register: result
+  until: result.stdout.find("ok") != -1
+  retries: 12
+  delay: 10
+
+- name: write kube-router-all-service-daemonset.yaml file
+  template: src=kube-router-all-service-daemonset.yaml.j2 dest=/etc/kubernetes/kube-router-all-service-daemonset.yaml
+
+- name: create flannel components
+  shell: kubectl apply -f /etc/kubernetes/kube-router-all-service-daemonset.yaml

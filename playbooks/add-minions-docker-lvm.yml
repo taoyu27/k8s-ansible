@@ -1,0 +1,5 @@
+---
+
+- hosts: add_minions
+  roles:
+    - docker-lvm

@@ -1,0 +1,12 @@
+nodePort: true
+mir2_handler_image_version: 2017-09-13-11
+mir2_manager_image_version: 2017-09-13-11
+mir2_ui_image_version: 2017-09-13-11
+handler_nodeport: 31008
+manager_nodeport: 31009
+ui_nodeport: 31007
+handler_replicas: 1
+manager_replicas: 1
+ui_replicas: 1
+
+nodePort: true

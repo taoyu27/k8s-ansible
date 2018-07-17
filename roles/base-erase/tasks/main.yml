@@ -1,0 +1,34 @@
+---
+###############################
+# un install docker software
+###############################
+
+- name:  stop docker
+  service: name=docker state=stopped enabled=no
+  ignore_errors: True
+
+- name: uninstall docker engine
+  yum: name=docker-engine state=absent update_cache=yes
+  ignore_errors: True
+
+- name: uninstall docker compose files
+  shell: mv /usr/bin/docker-compose /tmp/
+  ignore_errors: True
+
+- name: del docker config file
+  shell: rm -rf /etc/sysconfig/docker*
+  ignore_errors: True
+
+
+- name: stop node_exporter
+  service: name=node_exporter state=stopped enabled=no
+  ignore_errors: True
+
+- name: uninstall node_exporter
+  yum: name=golang-github-prometheus-node_exporter state=absent update_cache=yes
+  ignore_errors: True
+
+- name: del node_exporter config file
+  shell: rm -rf /etc/sysconfig/node_exporter
+  ignore_errors: True
+

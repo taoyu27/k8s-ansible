@@ -1,0 +1,23 @@
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: mir2-manager-svc
+  namespace: {{build_in_namespace}}
+  labels:
+    name: mir2-manager-svc
+spec:
+  ports:
+  - name: http-8080
+    protocol: TCP
+    port: 8080
+    targetPort: 8080
+  {% if nodePort == true %}
+  nodePort: {{ manager_nodeport }}
+  {% endif %}
+selector:
+    app: mir2-manager-deployment-tmpl
+  sessionAffinity: ClientIP
+{% if nodePort == true %}
+  type: NodePort
+{% endif %}

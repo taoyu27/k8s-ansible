@@ -1,0 +1,47 @@
+---
+
+# check variables
+- fail: msg="Bailing out. this play requires 'harbor_vg_name'"
+  when: harbor_vg_name is not defined
+
+- fail: msg="Bailing out. this play requires 'harbor_lv_name'"
+  when: harbor_lv_name is not defined
+
+
+- fail: msg="Bailing out. this play requires 'harbor_data_vol'"
+  when: harbor_data_vol is not defined
+
+- name: check harbor  lv
+  shell: lvs |grep {{ harbor_vg_name }}
+  register: check_harbor_lvm
+  ignore_errors: True
+  failed_when: check_harbor_lvm.rc == 0
+
+- name: create PV
+  shell: pvcreate  -f {{ harbor_data_vol }}
+  when: "'harbor_lv' not in check_harbor_lvm.stdout"
+
+- name: create VG
+  shell: vgcreate {{ harbor_vg_name }} {{ harbor_data_vol }}
+  when: "'harbor_lv'  not in check_harbor_lvm.stdout"
+
+- name: create lv
+  shell: lvcreate -l 100%FREE  -n {{harbor_lv_name}} {{ harbor_vg_name }}
+  when: "'harbor_lv'  not in check_harbor_lvm.stdout"
+
+- name: create /data directory
+  file: path=/data state=directory mode=0755
+  when: "'harbor_lv'  not in check_harbor_lvm.stdout"
+
+- name: format harbor disks
+  filesystem: fstype=xfs dev=/dev/{{ harbor_vg_name }}/{{harbor_lv_name}} opts="-n ftype=1" force=true
+  when: "'harbor_lv' not in check_harbor_lvm.stdout"
+
+- name: mount harbor disks
+  mount:
+    path: /data
+    src: /dev/{{ harbor_vg_name }}/{{harbor_lv_name}}
+    fstype: xfs
+    opts: "defaults,noatime,nobarrier"
+    state: mounted
+  when: "'harbor_lv' not in check_harbor_lvm.stdout"

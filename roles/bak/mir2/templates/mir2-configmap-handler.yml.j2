@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mir2-handler-configmap
+  namespace: {{build_in_namespace}}
+data:
+  application.yml: |-
+    spring:
+      rabbitmq:
+        addresses: {{ registry_host }}
+        port: 5672
+        username: {{RABBITMQ_USERNAME}}
+        password: {{RABBITMQ_PASSWORD}}
+        virtual-host: mir2-dev
+      datasource:
+          url: jdbc:mysql://{{registry_host}}:3306/mir2?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&allowMultiQueries=true&useSSL=false
+          username: root
+          password: root123
+
+    app:
+      tiller:
+        port: {{tiller_nodeport}}
+      pod:
+        restartPolicy: Always
+      scheduler:
+        name: handler-dev
+      type: mir2-dev
+    storage:
+      cephfs:
+        user: admin
+        mon-host: {{ceph_server}}
+        key: {{ceph_key}}
+        key-base64: {{ceph_key_base64}}
+        port: 6789
+        rootPath: /dev/
+

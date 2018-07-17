@@ -1,0 +1,6 @@
+---
+
+- hosts: registry
+  roles:
+    - private_registry-erase
+    - base-erase

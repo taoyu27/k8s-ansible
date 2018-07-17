@@ -1,0 +1,13 @@
+# check variables
+- fail: msg="Bailing out. this play requires 'registry_host'"
+  when: registry_host is not defined
+
+- fail: msg="Bailing out. this play requires 'registry_port'"
+  when: registry_port is not defined
+
+# tasks
+- name: write ingress-nginx.yaml file
+  template: src=ingress-nginx-controller.yaml.j2 dest=/etc/kubernetes/ingress-nginx-controller.yaml
+
+- name: create calico components
+  shell: kubectl apply -f /etc/kubernetes/ingress-nginx-controller.yaml

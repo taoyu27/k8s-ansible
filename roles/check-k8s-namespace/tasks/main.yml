@@ -1,0 +1,15 @@
+---
+#check  k8s
+
+
+- name: create  test  namespace
+  shell: kubectl  create namespace demo
+  register: namespace_create_result
+  ignore_errors: True
+
+- name: show check info
+  debug: var=namespace_create_result.stdout_lines verbosity=0
+
+- name: delete  test  namespace
+  shell: kubectl delete  namespaces/demo
+

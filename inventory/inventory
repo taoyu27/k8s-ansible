@@ -1,0 +1,52 @@
+#### 设置首次 部署节点名称、节点IP、管理员账号密码 ########
+registry ansible_host=172.16.71.222 ansible_user=root ansible_ssh_pass=huacloud
+master1 ansible_host=172.16.63.200 ansible_user=root ansible_ssh_pass=huacloud
+node1 ansible_host=172.16.63.201 ansible_user=root ansible_ssh_pass=huacloud
+node2 ansible_host=172.16.63.202 ansible_user=root ansible_ssh_pass=huacloud
+
+#### 添加部署新minion节点的节点名称、节点IP 、管理员账号密码 ########
+#node3 ansible_host=172.16.63.203 ansible_user=root ansible_ssh_pass=huacloud
+
+
+
+#### 角色定义 
+[registries]
+registry
+
+[masters]
+master1
+
+[minions]
+node1
+node2
+
+### 将新添加的节点放入add_minions组             ###################
+[add_minions]
+#node3
+
+[kubernetes:children]
+masters
+minions
+add_minions
+
+[machines:children]
+kubernetes
+registries
+etcd
+
+
+[helm]
+master1
+
+[chrony_server]
+registry
+
+[chrony_clients:children]
+minions
+masters
+
+[etcd]
+master1
+node1
+node2
+

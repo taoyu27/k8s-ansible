@@ -1,0 +1,100 @@
+- name: clear all file
+  shell: rm -rf /tmp/mir2
+
+- name: create /tmp/mir2
+  file: path=/tmp/mir2 state=directory mode=0755
+
+- name: clear the files
+  shell: rm -rf /tmp/mir2/*.*
+
+- name: write mir2-handler-svc file
+  template: src=mir2-handler-svc.yml.j2 dest=/tmp/mir2/mir2-handler-svc.yml
+
+- name: write mir2-handler-deployment file
+  template: src=mir2-handler-deployment.yml.j2 dest=/tmp/mir2/mir2-handler-deployment.yml
+
+- name: write mir2-configmap-handler file
+  template: src=mir2-configmap-handler.yml.j2 dest=/tmp/mir2/mir2-configmap-handler.yml
+
+
+- name: write mir2-manager-configmap file
+  template: src=mir2-configmap-manager.yml.j2 dest=/tmp/mir2/mir2-configmap-manager.yml
+
+- name: write mir2-manager-svc file
+  template: src=mir2-manager-svc.yml.j2 dest=/tmp/mir2/mir2-manager-svc.yml
+
+- name: write mir-manager-deployment file
+  template: src=mir2-manager-deployment.yml.j2 dest=/tmp/mir2/mir2-manager-deployment.yml
+
+
+- name: write mir2-ui-configmap file
+  template: src=mir2-configmap-ui.yml.j2 dest=/tmp/mir2/mir2-configmap-ui.yml
+
+- name: write mir2-ui-svc file
+  template: src=mir2-ui-svc.yml.j2 dest=/tmp/mir2/mir2-ui-svc.yml
+
+- name: write mir-ui-deployment file
+  template: src=mir2-ui-deployment.yml.j2 dest=/tmp/mir2/mir2-ui-deployment.yml
+
+- name: write namespace file
+  template: src=build-in-namespace.yml.j2 dest=/tmp/mir2/namespace.yml
+
+- name: write pv file 
+  template: src=upload-pv.yml.j2 dest=/tmp/mir2/upload-pv.yml
+
+- name: write  pvc file
+  template: src=upload-pvc.yml.j2 dest=/tmp/mir2/upload-pvc.yml
+
+- name: write  ceph-secret.yml file
+  template: src=ceph-secret.yml.j2 dest=/tmp/mir2/ceph-secret.yml
+
+- name: start the namespace
+  shell: kubectl apply -f /tmp/mir2/namespace.yml
+
+- name: write ingress-nginx.yaml file
+  template: src=ingress-nginx.yml.j2 dest=/etc/kubernetes/ingress-nginx.yaml
+  when: nodePort == false
+
+- name: write mir2-ingress.yaml file
+  template: src=mir2-ingress.yml.j2 dest=/etc/kubernetes/mir2-ingress.yaml
+  when: nodePort == false
+
+- name: create ingress-nginx components
+  shell: kubectl apply -f /etc/kubernetes/mir2-ingress.yaml
+  when: nodePort == false
+
+- name: create the ceph secret
+  shell: kubectl apply -f /tmp/mir2/ceph-secret.yml
+
+- name: create the ceph pv
+  shell: kubectl apply -f /tmp/mir2/upload-pv.yml
+
+- name: create the ceph pvc 
+  shell: kubectl apply -f /tmp/mir2/upload-pvc.yml
+
+- name: start the mir2-handler-configmap
+  shell: kubectl apply -f /tmp/mir2/mir2-configmap-handler.yml
+
+- name: start the mir2-handler-svc
+  shell: kubectl apply -f /tmp/mir2/mir2-handler-svc.yml
+
+- name: start the mir2-handler-deployment
+  shell: kubectl apply -f /tmp/mir2/mir2-handler-deployment.yml
+
+- name: start the mir2-manager-configmap
+  shell: kubectl apply -f /tmp/mir2/mir2-configmap-manager.yml
+
+- name: start the mir2-manager-svc
+  shell: kubectl apply -f /tmp/mir2/mir2-manager-svc.yml
+
+- name: start the mir2-manager-deployment
+  shell: kubectl apply -f /tmp/mir2/mir2-manager-deployment.yml
+
+- name: start the mir2-ui-configmap
+  shell: kubectl apply -f /tmp/mir2/mir2-configmap-ui.yml
+
+- name: start the mir2-ui-svc
+  shell: kubectl apply -f /tmp/mir2/mir2-ui-svc.yml
+
+- name: start the mir2-ui-deployment
+  shell: kubectl apply -f /tmp/mir2/mir2-ui-deployment.yml

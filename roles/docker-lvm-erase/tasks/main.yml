@@ -1,0 +1,10 @@
+---
+
+- name:  umount /var/lib/docker
+  shell: umount /var/lib/docker
+
+- name:  remove  docker VG
+  shell: vgremove -f docker_vg
+
+- name: clean fstab
+  shell: sed -i '/^\/dev\/docker_vg\/docker_lv .*/d' /etc/fstab

@@ -1,0 +1,28 @@
+---
+- name: create repo bak directory
+  file: path=/etc/yum.repos.d/bak state=directory mode=0755
+
+- name: remove all base repository
+  shell: mv /etc/yum.repos.d/*.repo  /etc/yum.repos.d/bak
+  ignore_errors: yes
+
+- name: add mir2 private yum repository
+  template: src=mir2.repo dest=/etc/yum.repos.d/mir2.repo
+
+- name: clean all
+  shell: yum clean all
+
+- name: install nginx
+  shell: yum -y install nginx
+
+- name: add nginx.conf configure
+  template: src=nginx.conf.j2 dest=/etc/nginx/nginx.conf
+
+- name: create conf.d directory
+  file: path=/etc/nginx/conf.d/ state=directory mode=0755
+
+- name: add default.conf configure
+  template: src=default.conf.j2 dest=/etc/nginx/conf.d/default.conf
+
+- name: start nginx server
+  service: name=nginx state=restarted enabled=yes

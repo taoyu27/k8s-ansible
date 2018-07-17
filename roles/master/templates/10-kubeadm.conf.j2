@@ -1,0 +1,13 @@
+[Service]
+Environment="KUBELET_KUBECONFIG_ARGS=--kubeconfig=/etc/kubernetes/worker-kubeconfig.yaml --require-kubeconfig=true"
+Environment="KUBELET_SYSTEM_PODS_ARGS=--pod-manifest-path=/etc/kubernetes/manifests --allow-privileged=true"
+Environment="KUBELET_NETWORK_ARGS=--network-plugin=cni --cni-conf-dir=/etc/cni/net.d --cni-bin-dir=/opt/cni/bin"
+Environment="KUBELET_DNS_ARGS=--cluster-dns={{ dns_cluster_ip }} --cluster-domain={{ dns_domain }}  --resolv-conf=/etc/resolv.conf"
+#Environment="KUBELET_AUTHZ_ARGS=--authorization-mode=Webhook --client-ca-file=/etc/kubernetes/pki/ca.crt"
+Environment="KUBELET_CADVISOR_ARGS=--cadvisor-port=9100   --fail-swap-on=false"
+Environment="KUBELET_CGROUP_ARGS=--cgroup-driver=cgroupfs --runtime-cgroups=/systemd/system.slice --kubelet-cgroups=/systemd/system.slice"
+Environment="KUBELET_RESOURCE_ARGS=--kube-reserved=cpu=500m,memory=1024Mi --eviction-hard=memory.available<512Mi"
+Environment="KUBELET_PODINFRA_ARGS=--pod-infra-container-image={{ registry_host }}{% if registry_port != 80 %}:{{ registry_port }}{% endif %}/kubernetes/pause-amd64:{{pause_amd64_version}}"
+Environment="KUBELET_LOG_FILE=--log-dir=/var/log/kubelet --logtostderr=false"
+ExecStart=
+ExecStart=/usr/bin/kubelet $KUBELET_KUBECONFIG_ARGS $KUBELET_SYSTEM_PODS_ARGS $KUBELET_NETWORK_ARGS $KUBELET_DNS_ARGS  $KUBELET_CADVISOR_ARGS $KUBELET_CGROUP_ARGS $KUBELET_EXTRA_ARGS $KUBELET_RESOURCE_ARGS $KUBELET_PODINFRA_ARGS $KUBELET_LOG_FILE

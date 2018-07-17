@@ -1,0 +1,39 @@
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: mir2-ui-deployment
+  namespace: {{build_in_namespace}}
+spec:
+  replicas: {{ ui_replicas }}
+  template:
+    metadata:
+      labels:
+        app: mir2-ui-deployment-tmpl
+    spec:
+      containers:
+      - name: mir2-ui
+        image: {{registry_host}}/library/mir2-ui:{{mir2_ui_image_version}}
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - mountPath: "/var/uploadPath"
+          name: upload-volume
+        - mountPath: "/etc/localtime"
+          name: timezone-volume
+        - mountPath: "/usr/share/nginx/html/mir2-ui/assets/json"
+          name: ui-config
+        env:
+        - name: MIR2_MANAGER_ENDPOINT
+          value: http://mir2-manager-svc:8080
+      volumes:
+      - name: ui-config
+        configMap:
+          name: mir2-ui-configmap
+      - name: upload-volume
+        persistentVolumeClaim:
+          claimName: upload-pvc
+      - name: timezone-volume
+        hostPath:
+          path: "/etc/localtime"

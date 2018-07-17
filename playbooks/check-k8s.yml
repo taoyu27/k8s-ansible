@@ -1,0 +1,6 @@
+- hosts: master1
+  roles:
+    - check-k8s-namespace
+    - check-k8s-configmap
+    - check-k8s-deamonset
+    - check-k8s-deploy-service

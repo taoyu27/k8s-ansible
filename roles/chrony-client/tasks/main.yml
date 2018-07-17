@@ -1,0 +1,21 @@
+- name: remove all base repository
+  shell: rm -rf /etc/yum.repos.d/*
+
+- name: add mir2 private yum repository
+  template: src=mir2.repo dest=/etc/yum.repos.d/mir2.repo
+
+
+- name: clean all
+  shell: yum clean all
+
+- name: install chrony
+  shell: yum -y install chrony
+
+- name: add chrony configure
+  template: src=chrony.conf.j2 dest=/etc/chrony.conf
+
+- name: add chrony key
+  template: src=chrony.keys dest=/etc/chrony.keys
+
+- name: start chrony
+  service: name=chronyd state=restarted enabled=yes

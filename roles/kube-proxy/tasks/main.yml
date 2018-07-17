@@ -1,0 +1,35 @@
+# check variables
+- fail: msg="Bailing out. this play requires 'registry_host'"
+  when: registry_host is not defined
+
+- fail: msg="Bailing out. this play requires 'registry_port'"
+  when: registry_port is not defined
+
+# tasks
+
+- action: shell  curl http://{% if master_vip %}{{ master_vip }}{% else %}{{ hostvars[groups['masters'][0]]['ansible_host']}}{% endif %}:{% if master_vip_port %}{{master_vip_port}}{% else %}8080{% endif %}
+  register: result
+  until: result.stdout.find("ok") != -1
+  retries: 12
+  delay: 10
+
+
+- name: copy owner kube-proxy binary
+  copy: src=kube-proxy/ dest=/usr/bin/  mode=0755  backup=yes
+
+
+- name: write kube-proxy.service file
+  template: src=kube-proxy.service.j2 dest=/usr/lib/systemd/system/kube-proxy.service
+
+
+- name: daemon reload
+  shell: systemctl daemon-reload
+
+- name: start kube-proxy
+  service: name=kube-proxy state=restarted enabled=yes
+
+#- name: write kube-proxy.yaml file
+#  template: src=kube-proxy.yaml.j2 dest=/etc/kubernetes/kube-proxy.yaml
+
+#- name: create kube-proxy components
+#  shell: kubectl apply -f /etc/kubernetes/kube-proxy.yaml

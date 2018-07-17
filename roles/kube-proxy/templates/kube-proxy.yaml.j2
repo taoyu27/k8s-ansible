@@ -1,0 +1,43 @@
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: kube-proxy
+  namespace: kube-system
+  labels:
+    name: kube-proxy
+spec:
+  updateStrategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: kube-proxy
+    spec:
+      hostNetwork: true
+      containers:
+      - name: kube-proxy
+        image: {{ registry_host }}{% if registry_port != 80 %}:{{ registry_port }}{% endif %}/kubernetes/hyperkube:{{k8s_version}}
+        command:
+        - /hyperkube
+        - proxy
+        - --master=http://{% if master_vip %}{{ master_vip }}{% else %}{{ hostvars[groups['masters'][0]]['ansible_host']}}{% endif %}:{% if master_vip_port %}{{master_vip_port}}{% else %}8080{% endif %}
+
+        - --proxy-mode=iptables
+        - --masquerade-all
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - mountPath: /etc/ssl/certs
+          name: ssl-certs-host
+          readOnly: true
+        resources:
+          limits:
+            cpu: 500m
+            memory: 512Mi
+          requests:
+            cpu: 500m
+            memory: 512Mi
+      volumes:
+      - hostPath:
+          path: /usr/share/ca-certificates
+        name: ssl-certs-host

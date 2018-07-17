@@ -1,0 +1,25 @@
+---
+- name: create repo bak directory
+  file: path=/etc/yum.repos.d/bak state=directory mode=0755
+
+- name: remove all base repository
+  shell: mv /etc/yum.repos.d/*.repo  /etc/yum.repos.d/bak
+  ignore_errors: yes
+
+- name: add mir2 private yum repository
+  template: src=mir2.repo dest=/etc/yum.repos.d/mir2.repo
+
+- name: clean all
+  shell: yum clean all
+
+- name: install chrony
+  shell: yum -y install chrony
+
+- name: add chrony configure
+  template: src=chrony.conf.j2 dest=/etc/chrony.conf
+
+- name: add chrony key
+  template: src=chrony.keys dest=/etc/chrony.keys
+
+- name: start chrony
+  service: name=chronyd state=restarted enabled=yes

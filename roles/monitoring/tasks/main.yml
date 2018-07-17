@@ -1,0 +1,6 @@
+
+- name: start the dashboard service
+  shell: kubectl apply -f /opt/example_kubernetes/functions/monitoring/kubernetes-dashboard
+
+- name: start grafana influxdb heapster rc
+  shell: sh /opt/example_kubernetes/functions/monitoring/kube.sh start

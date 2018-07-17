@@ -1,0 +1,57 @@
+apiVersion: v1
+items:
+- apiVersion: v1
+  kind: Service
+  metadata:
+    name: mongodb
+    namespace: {{build_in_namespace}}
+  spec:
+    ports:
+    - name: "27017"
+      port: 27017
+      targetPort: 27017
+      nodePort: {{mongo_nodeport}}
+    selector:
+      app: mongodb
+    type: NodePort
+- apiVersion: extensions/v1beta1
+  kind: Deployment
+  metadata:
+    name: mongodb
+    namespace: {{build_in_namespace}}
+  spec:
+    replicas: 1
+    strategy:
+      type: Recreate
+    template:
+      metadata:
+        labels:
+          app: mongodb
+      spec:
+        containers:
+        - image: {{registry_host}}/library/mongodb:{{mongo_version}}
+          name: mongodb
+          ports:
+          - containerPort: 27017
+          volumeMounts:
+           - name: mongo-config-init
+             mountPath: /docker-entrypoint-initdb.d
+           - mountPath: /data/db
+             name: mongodb-mongodb-data
+          env:
+            - name: "MONGO_INITDB_ROOT_USERNAME"
+              value: {{MONGO_INITDB_ROOT_USERNAME}}
+            - name: "MONGO_INITDB_ROOT_PASSWORD"
+              value: {{MONGO_INITDB_ROOT_PASSWORD}}
+            - name: "MONGO_INITDB_DATABASE"
+              value: {{MONGO_INITDB_DATABASE}}
+        restartPolicy: Always
+        volumes:
+        - name: mongo-config-init
+          configMap:
+            name: mongo-config-init
+        - name: mongodb-mongodb-data
+          persistentVolumeClaim:
+            claimName: mongodb-pvc
+kind: List
+metadata: {}

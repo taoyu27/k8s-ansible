@@ -1,0 +1,12 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: upload-pvc
+  namespace: {{ build_in_namespace }}
+spec:
+  accessModes:
+    - ReadWriteMany
+  volumeName: upload-pv
+  resources:
+    requests:
+      storage: 1Gi

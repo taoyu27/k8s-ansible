@@ -1,0 +1,4 @@
+- hosts: machines
+  remote_user: root
+  roles:
+  - cluster_network_check

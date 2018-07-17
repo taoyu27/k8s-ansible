@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{build_in_namespace}}
+spec:
+  finalizers:
+  - kubernetes
+status:
+  phase: Active

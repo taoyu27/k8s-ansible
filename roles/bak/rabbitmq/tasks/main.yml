@@ -1,0 +1,37 @@
+- name: clear all file
+  shell: rm -rf /tmp/rabbitmq
+
+- name: create /tmp/rabbitmq
+  file: path=/tmp/rabbitmq state=directory mode=0755
+
+- name: write ceph secrect file
+  template: src=ceph-secret.yml.j2 dest=/tmp/rabbitmq/ceph-secret.yml
+
+- name: write built-in build-in-namespace file
+  template: src=build-in-namespace.yml.j2 dest=/tmp/rabbitmq/build-in-namespace.yml
+
+- name: write rabbitmq-docker-compose file
+  template: src=rabbitmq-docker-compose.yml.j2 dest=/tmp/rabbitmq/docker-compose.yml
+
+# - name: write rabbitmq-pv file
+#   template: src=rabbitmq-pv.yml.j2 dest=/tmp/rabbitmq/rabbitmq-pv.yml
+
+# - name: write rabbitmq-pvc file
+#   template: src=rabbitmq-pvc.yml.j2 dest=/tmp/rabbitmq/rabbitmq-pvc.yml
+
+# - name: create built-in namespace
+#   shell: kubectl apply -f /tmp/rabbitmq/build-in-namespace.yml
+
+# - name: create ceph-secret
+#   shell: kubectl apply -f /tmp/rabbitmq/ceph-secret.yml
+
+- name: start rabbitmq service
+  args:
+    chdir: /tmp/rabbitmq/
+  shell: docker-compose  up -d
+
+# - name: start rabbitmq service
+#   shell: kubectl apply -f /tmp/rabbitmq/rabbitmq-pv.yml
+
+# - name: start rabbitmq service
+#   shell: kubectl apply -f /tmp/rabbitmq/rabbitmq-pvc.yml

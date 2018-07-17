@@ -1,0 +1,23 @@
+[Unit]
+Description=Docker Application Container Engine
+Documentation=http://docs.docker.com
+
+[Service]
+EnvironmentFile=-/etc/sysconfig/docker
+EnvironmentFile=-/etc/sysconfig/docker-storage
+EnvironmentFile=-/etc/sysconfig/docker-network
+ExecStart=/usr/bin/dockerd -H tcp://0.0.0.0:2376 -H unix:///var/run/docker.sock  \
+	      --ip-masq=false \
+          $DOCKER_NETWORK_OPTIONS \
+          $INSECURE_REGISTRY
+RestartSec=10
+Restart=always
+ExecReload=/bin/kill -s HUP $MAINPID
+LimitNOFILE=1048576
+LimitNPROC=1048576
+LimitCORE=infinity
+TimeoutStartSec=0
+MountFlags=slave
+
+[Install]
+WantedBy=multi-user.target

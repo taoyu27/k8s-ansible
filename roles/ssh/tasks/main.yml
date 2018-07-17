@@ -1,0 +1,23 @@
+---
+- name: create /root/.ssh directory
+  file: 
+    path: /root/.ssh 
+    state: directory 
+    mode: 0700
+
+- name: copy id_rsa to /root/.ssh/id_rsa
+  copy: 
+    src: id_rsa.autodeploy 
+    dest: /root/.ssh/id_rsa 
+    mode: 0400
+
+- name: clean the pub-key /root/.ssh/id_rsa.pub
+  file: 
+    path: /root/.ssh/id_rsa.pub
+    state: absent
+
+- name: Set authorized key took from file
+  authorized_key:
+    user: root
+    state: present
+    key: "{{ lookup('file', 'id_rsa.autodeploy.pub') }}"

@@ -1,0 +1,70 @@
+---
+
+# 解压 example_kubernetes yml
+- name: copy example_kubernetes yaml file
+  copy: src=example_kubernetes.tar.gz dest=/opt
+
+- name: tar xzf example_kubernetes.tar.gz
+  unarchive: src=/opt/example_kubernetes.tar.gz dest=/opt copy=no
+
+# 查找到addons的目录列表，但是除去存储部分
+- name: find addons
+  shell: ls  /opt/example_kubernetes/addons/|grep -v ceph-rbd |grep -v nfs|grep -v istio|grep -v  fluentd-elasticsearch|grep -v ingress|grep -v prometheus
+  register: command_result
+
+- name: Create harbor addrs configmap  file for k8s
+  template: src=harbor-addrs.yaml.j2 dest=/opt/example_kubernetes/addons/kubedns/harbor-addrs.yaml
+
+- name: get istio-system namespace
+  shell: kubectl get ns
+  register: namespace
+  ignore_errors: True
+
+- name: show istio_namespace
+  debug: msg="msg is -{{ namespace['stdout'] }}-"
+
+- name: create istio-system namespace
+  shell: kubectl create ns istio-system  | sleep 30
+  when:  "'istio' not in namespace.stdout"
+
+- name: set namespaces quata
+  shell: kubectl apply -f  /opt/example_kubernetes/addons/default-quota
+
+#- name: create istio
+#  shell: kubectl apply -f {{ isto_4 }}/istio.yaml | sleep 120
+#  ignore_errors: yes
+  
+#- name: create istio-initialier
+#  shell: kubectl apply -f {{ isto_4 }}/istio-initializer.yaml | sleep 60
+#  ignore_errors: yes
+
+- name: create istio
+  shell: kubectl apply -f {{ istio_diretory }}/istio.yaml
+
+- name: create and apporve the CSR
+  shell: sh {{ istio_diretory }}/webhook-create-signed-cert.sh --service istio-sidecar-injector --namespace istio-system --secret sidecar-injector-certs
+  ignore_errors: yes
+
+- name: install sidecar injection configmap
+  shell: kubectl apply -f {{ istio_diretory }}/istio-sidecar-injector-configmap-release.yaml
+
+- name: set caBundle
+  shell: cat {{ istio_diretory }}/istio-sidecar-injector.yaml | sh {{ istio_diretory }}/webhook-patch-ca-bundle.sh > {{ istio_diretory }}/istio-sidecar-injector-with-ca-bundle.yaml
+
+- name: create istio-sidecar-injector-with-ca-bundle
+  shell: kubectl apply -f {{ istio_diretory }}/istio-sidecar-injector-with-ca-bundle.yaml
+
+- name: enable namespace to istio-sidecar-injector
+  shell: kubectl label --overwrite namespace default istio-injection=enabled
+
+
+- name: create zipkin
+  shell: kubectl apply -f {{isto_4}}/zipkin.yaml | sleep 30
+  ignore_errors: yes
+
+
+#根据目录列表部署服务
+- name: create addons services
+  shell: kubectl apply -f  /opt/example_kubernetes/addons/{{ item }} | sleep 30
+  with_items: "{{command_result.stdout_lines}}"
+  ignore_errors: yes

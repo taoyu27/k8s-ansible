@@ -1,0 +1,13 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: harbor-addrs
+  namespace: kube-system
+data:
+  keys: |
+{% for k,v in hostvars.iteritems() %}
+{%   if k=="registry" and "ansible_host" in hostvars[k].keys()  %}
+      {{ hostvars[k].ansible_host }}    {{ registry_host }}
+{%   endif %}
+{% endfor %}

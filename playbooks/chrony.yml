@@ -1,0 +1,9 @@
+---
+
+- hosts: chrony_server
+  roles:
+    - chrony-server
+
+- hosts: chrony_clients
+  roles:
+    - chrony-client

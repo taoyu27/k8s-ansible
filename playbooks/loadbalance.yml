@@ -1,0 +1,10 @@
+---
+- hosts: machines
+  roles:
+    - hostnames
+
+- hosts: lbs
+  roles:
+    - ssh
+    - nginx
+    - keepalived

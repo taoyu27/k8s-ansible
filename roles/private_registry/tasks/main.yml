@@ -1,0 +1,119 @@
+---
+- name: check harbor_data*.tar.gz
+  shell: find /opt/ -name harbor_data_*.tar.gz|wc -l
+  register: check_harbor_data
+
+- name: display harbor data error
+  pause: prompt=" Harbor's host not find harbor_data_*.tar.gz ; Please put harbor_data_*.tar.gz to  Harbor's host /opt/ directory . "
+  when: check_harbor_data.stdout == "0"
+
+- name: check harbor mount point
+  shell: grep -r "/harbor" /etc/rc.local
+  register: check_harbor_compose_point
+  ignore_errors: True
+  failed_when: check_harbor_compose_point.rc == 0
+
+- name: copy owner docker binary
+  copy: src=docker/ dest=/usr/bin/  mode=0755 backup=yes
+
+- name: create /data directory
+  file: path=/data state=directory mode=0755
+
+- name: unzip harbor_data_fast*.tar.gz
+  shell: tar -xf /opt/harbor_data_*.tar.gz -C /
+
+- name: create /tmp/registry directory
+  file: path=/tmp/registry state=directory mode=0755
+
+- name: stop firewalld
+  service: name=firewalld state=stopped enabled=no
+
+- name: modify the limits
+  template: src=limits.conf dest=/etc/security/limits.conf
+
+- name: remove all base repository
+  shell: rm -rf /etc/yum.repos.d/*
+
+- name: add mir2 private yum repository
+  template: src=mir2.repo dest=/etc/yum.repos.d/mir2.repo
+
+- name: remove registry
+  shell: rm -rf /root/harbor
+
+- name: clean all
+  shell: yum clean all
+
+- name: install docker engine
+  shell: yum -y install docker-engine
+
+- name: write docker configure file
+  template: src=docker dest=/etc/sysconfig/docker
+
+- name: write docker network configure file
+  template: src=docker-network dest=/etc/sysconfig/docker-network
+
+- name: write docker storage configure file 
+  template: src=docker-storage dest=/etc/sysconfig/docker-storage
+
+- name: Add any insecure registrys to docker config
+  lineinfile: dest=/etc/sysconfig/docker regexp=^INSECURE_REGISTRY= line=INSECURE_REGISTRY="{% for reg in insecure_registrys %}--insecure-registry={{ reg }} {% endfor %}"
+  when: insecure_registrys is defined and insecure_registrys > 0
+
+
+- name: write docker.service
+  template: src=docker-lvm.service.j2 dest=/etc/systemd/system/docker.service
+
+- name: daemon reload
+  shell: systemctl daemon-reload
+
+- name: start docker
+  service: name=docker state=restarted enabled=yes
+
+- action: shell  netstat -ntlp
+  register: result
+  until: result.stdout.find("2376") != -1
+  retries: 5
+  delay: 10
+
+- name: download registry package
+  get_url:
+    url: "http://{% if reposerver %}{{ reposerver }}{% else %}{{ hostvars[groups['registries'][0]]['ansible_host']}}{% endif %}:82/latest/mir2/packages/harbor-offline-installer-{{ harbor_version }}.tgz"
+    dest: /tmp/registry/harbor-offline-installer-{{ harbor_version }}.tgz
+    mode: 0440
+
+- name: tar -xvzf 
+  shell: tar -xvzf /tmp/registry/harbor-offline-installer-{{ harbor_version }}.tgz
+
+- name: set registry access url 1
+  shell: sed -i '/^hostname.*/d' /root/harbor/harbor.cfg 
+
+- name: set registry access url 2
+  shell: sed -i '1i\hostname = {{ ansible_default_ipv4.address }}' /root/harbor/harbor.cfg 
+
+- name: set the password of registry 1
+  shell: sed -i '/^harbor_admin_password.*/d' /root/harbor/harbor.cfg 
+
+- name: set the password of registry 2
+  shell: sed -i '1i\harbor_admin_password = {{ registry_ui_passwd }}' /root/harbor/harbor.cfg 
+
+
+- name: chmod +x install.sh prepare upgrade
+  shell: chmod +x install.sh prepare upgrade
+  args:
+    chdir: /root/harbor
+
+- name: start registry
+  shell: sh install.sh
+  args:
+    chdir: /root/harbor
+
+- name: set harbor reboot
+  shell: sed -i '$a\docker-compose -f /root/harbor/docker-compose.yml  {{ item }} ' /etc/rc.d/rc.local
+  with_items:
+  - stop
+  - start
+  when: "'/root/harbor/docker-compose.yml' not in check_harbor_compose_point.stdout"
+
+- name: set rc.local +x
+  shell: chmod +x /etc/rc.d/rc.local
+  when: "'/root/harbor/docker-compose.yml' not in check_harbor_compose_point.stdout"

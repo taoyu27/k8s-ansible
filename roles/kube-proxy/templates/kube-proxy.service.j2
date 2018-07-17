@@ -1,0 +1,22 @@
+[Unit]
+Description=Kubernetes Proxy
+Documentation=https://github.com/GoogleCloudPlatform/kubernetes
+
+[Service]
+# wait for kubernetes master to be up and ready
+ExecStartPre=-/opt/bin/wupiao {% if master_vip %}{{ master_vip }}{% else %}{{ hostvars[groups['masters'][0]]['ansible_host']}}{% endif %}  {% if master_vip_port %}{{master_vip_port}}{% else %}8080{% endif %}
+
+ExecStartPre=-mkdir -p /var/log/kube-proxy
+ExecStart=/usr/bin/kube-proxy \
+  --master=http://{% if master_vip %}{{ master_vip }}{% else %}{{ hostvars[groups['masters'][0]]['ansible_host']}}{% endif %}:{% if master_vip_port %}{{master_vip_port}}{% else %}8080{% endif %}   \
+  --kubeconfig=/etc/kubernetes/worker-kubeconfig.yaml \
+  --proxy-mode=iptables \
+  --masquerade-all \
+  --v={{ log_level }} \
+  --log-dir=/var/log/kube-proxy \
+  --logtostderr=false
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

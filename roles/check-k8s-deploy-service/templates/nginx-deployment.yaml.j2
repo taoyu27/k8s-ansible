@@ -1,0 +1,18 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: nginx-dm
+  namespace: default
+spec:
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+        - name: nginx
+          image: {{ registry_host }}{% if registry_port != 80 %}:{{ registry_port }}{% endif %}/common/nginx:1.8.1
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80

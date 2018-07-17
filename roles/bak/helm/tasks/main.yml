@@ -1,0 +1,46 @@
+# before your start, you must download the helm client from github: https://github.com/kubernetes/helm/releases
+# you have to down load the tiller image from the gcr.io firstly, if you can not access the google
+# and, push the tiller image into your local registry. you can indicat the registry path of image when you 
+# start the helm init
+
+- name: create /tmp/helm directory
+  file: path=/tmp/helm state=directory mode=0755
+
+- name: stop firewalld
+  service: name=firewalld state=stopped enabled=no
+
+- name: modify the limits
+  template: src=limits.conf dest=/etc/security/limits.conf
+
+- name: remove all base repository
+  shell: rm -rf /etc/yum.repos.d/*
+
+- name: add mir2 private yum repository
+  template: src=mir2.repo dest=/etc/yum.repos.d/mir2.repo
+
+- name: clean all
+  shell: yum clean all
+
+- name: install helm client
+  shell: yum -y install helm
+
+- name: add the executable rights
+  shell: chmod +x /usr/local/bin/helm
+
+- name: write tiller svc file
+  template: src=tiller-svc.yml.j2 dest=/tmp/helm/tiller-svc.yml
+
+- name: download helminfo packages
+  get_url:
+    url: "http://{% if reposerver %}{{ reposerver }}{% else %}{{ hostvars[groups['registries'][0]]['ansible_host']}}{% endif %}:82/latest/mir2/packages/helminfo.tar"
+    dest: /tmp/helm/helminfo.tar
+    mode: 0440
+
+- name: create helm directory
+  shell: tar -xvzf /tmp/helm/helminfo.tar
+
+- name: start helm
+  shell: helm init --tiller-image {{ registry_host }}{% if registry_port != 80 %}:{{ registry_port }}{% endif %}/helm/tiller:{{ helm_version }}
+
+- name: start the tiller service
+  shell: kubectl apply -f /tmp/helm/tiller-svc.yml

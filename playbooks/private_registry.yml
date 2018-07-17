@@ -1,0 +1,5 @@
+---
+
+- hosts: registries
+  roles:
+    - private_registry

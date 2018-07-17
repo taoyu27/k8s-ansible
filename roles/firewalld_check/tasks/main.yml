@@ -1,0 +1,16 @@
+--- 
+- name: "centos7 firewalld.service status check"
+  shell: firewall-cmd --state
+  register: firewalld_status
+  ignore_errors: true
+  failed_when: firewalld_status.rc == 0
+
+- name: display firewalld.service enable
+  debug: msg="Firewalld is enabled. The check result is NG! Please diasble it!"
+  when: firewalld_status|succeeded
+  ignore_errors: True 
+
+- name: display firewalld.service disable
+  debug: msg="Firewalld is disabled. The check result is OK."
+  when: firewalld_status|failed
+  ignore_errors: True

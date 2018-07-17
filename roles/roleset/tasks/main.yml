@@ -1,0 +1,12 @@
+---
+#设置 node 角色
+- name: copy role_list directory
+  copy: src=role_list dest=/opt/
+
+- name: setting node role
+  shell: for k in `cat /opt/role_list/{{item}}`;do kubectl label --overwrite nodes $k  www.chinacloud.com.cn/role=network;done
+  with_items: "{{role_list}}"
+
+- name: setting node role
+  shell: for k in `cat /opt/role_list/{{item}}`;do kubectl label --overwrite nodes $k  www.chinacloud.com.cn/edgenode=true;done
+  with_items: "{{role_list}}"

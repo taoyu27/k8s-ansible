@@ -1,0 +1,5 @@
+---
+- hosts: registries
+  roles:
+    - harbor-lvm-erase
+    - docker-lvm-erase

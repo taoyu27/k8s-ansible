@@ -1,0 +1,29 @@
+---
+#check  k8s
+
+- name: wirte deamonset yaml
+  template: src=deamonset.yaml.j2 dest=/tmp/deamonset.yaml
+
+
+- name: create deamonset demo
+  shell: kubectl create -f /tmp/deamonset.yaml
+  register: deamonset_create_result
+  ignore_errors: True
+- name: show check info
+  debug: var=deamonset_create_result.stdout_lines verbosity=0
+
+
+- name: sleep  15s
+  shell: sleep 15
+
+- name: run check module to ckeck deamonset demo
+  deamonset:  get_facts=yes
+  register: deamonset_ckeck_result
+  ignore_errors: True
+- name: show check info
+  debug: var=deamonset_ckeck_result verbosity=0
+
+
+- name: clean deamonset demo
+  shell: kubectl delete -f  /tmp/deamonset.yaml
+

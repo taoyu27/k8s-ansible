@@ -1,0 +1,8 @@
+apiVersion: v1
+data:
+  init-db.js: |
+    db.createUser({ user: '{{mongo_user}}', pwd: '{{mongo_passwd}}', roles: [ { role: 'readWrite', db: 'mir2' } ] });
+kind: ConfigMap
+metadata:
+  name: mongo-config-init
+  namespace: {{build_in_namespace}}

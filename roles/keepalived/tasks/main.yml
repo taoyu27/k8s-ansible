@@ -1,0 +1,28 @@
+---
+- name: create repo bak directory
+  file: path=/etc/yum.repos.d/bak state=directory mode=0755
+
+- name: remove all base repository
+  shell: mv /etc/yum.repos.d/*.repo  /etc/yum.repos.d/bak
+  ignore_errors: yes
+
+- name: add mir2 private yum repository
+  template: src=mir2.repo dest=/etc/yum.repos.d/mir2.repo
+
+- name: clean all
+  shell: yum clean all
+
+- name: install nginx
+  shell: yum -y install nginx
+
+- name: install keepalived
+  shell: yum -y install keepalived
+
+- name: add keepalived configure
+  template: src=keepalived.conf.j2 dest=/etc/keepalived/keepalived.conf
+
+- name: add ckeck nginx script
+  template: src=check_nginx.sh.j2 dest=/etc/keepalived/check_nginx.sh mode=0755
+
+- name: start keepalived server
+  service: name=keepalived state=restarted enabled=yes

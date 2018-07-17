@@ -1,0 +1,30 @@
+
+# tasks
+- name: create /opt/bin directory
+  file: path=/opt/bin state=directory mode=0755
+
+- name: clean all
+  shell: yum clean all
+
+- name: install kubernetes components
+  shell: yum -y install kubernetes
+
+- name: copy owner kubernetes binary
+  copy: src=kubernetes/ dest=/usr/bin/  mode=0755  backup=yes
+
+
+- name: copy cni-amd64-{{cni_version}}.tgz
+  copy: src=cni-amd64-{{cni_version}}.tgz dest=/opt
+
+- name: create /opt/cni/bin directory
+  file: path=/opt/cni/bin state=directory mode=0755
+
+- name: tar xzf cni-amd64-{{cni_version}}.tgz
+  unarchive: src=/opt/cni-amd64-{{cni_version}}.tgz dest=/opt/cni/bin copy=no
+
+- name: write worker-kubeconfig.yaml
+  template: src=worker-kubeconfig.yaml.j2 dest=/etc/kubernetes/worker-kubeconfig.yaml
+
+- name: build role_file to role_list directory
+  local_action: script init-role.sh /etc/ansible/roles/roleset/files/role_list {{item}} {% if groups[item] %}{% for host in groups[item] %}{{hostvars[host]['ansible_nodename']}}{% if not loop.last %},{% endif %}{% endfor %}{% else %} {% for host in groups['minions'] %}{{hostvars[host]['ansible_nodename']}}{% if not loop.last %},{% endif %}{% endfor %}{% endif %}
+  with_items: "{{role_list}}"

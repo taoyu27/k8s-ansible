@@ -1,0 +1,20 @@
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: mir2-handler-svc
+  namespace: {{ build_in_namespace }}
+  labels:
+    name: mir2-handler-svc
+spec:
+  ports:
+  - name: http-8080
+    protocol: TCP
+    port: 8080
+    targetPort: 8080
+  selector:
+    app: mir2-handler-deployment-tmpl
+  sessionAffinity: ClientIP
+
+

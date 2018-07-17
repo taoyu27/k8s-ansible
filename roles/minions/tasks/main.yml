@@ -1,0 +1,73 @@
+---
+
+- action: shell  curl http://{% if master_vip %}{{ master_vip }}{% else %}{{ hostvars[groups['masters'][0]]['ansible_host']}}{% endif %}:{% if master_vip_port %}{{master_vip_port}}{% else %}8080{% endif %}
+  register: result
+  until: result.stdout.find("ok") != -1
+  retries: 12
+  delay: 10
+
+# check variables
+- fail: msg="Bailing out. this play requires 'registry_host'"
+  when: registry_host is not defined
+
+- fail: msg="Bailing out. this play requires 'registry_port'"
+  when: registry_port is not defined
+
+# tasks
+
+- name: create /var/log/kubelet
+  file: path=/var/log/kubelet state=directory mode=0755
+
+- name: create /etc/cni/net.d
+  file: path=/etc/cni/net.d state=directory mode=0755
+
+- name: write docker configure file
+  template: src=docker dest=/etc/sysconfig/docker
+
+- name: write docker network configure file
+  template: src=docker-network dest=/etc/sysconfig/docker-network
+
+- name: write docker storage configure file
+  template: src=docker-storage dest=/etc/sysconfig/docker-storage
+
+
+- name: Add any insecure registrys to docker config
+  lineinfile: dest=/etc/sysconfig/docker regexp=^INSECURE_REGISTRY= line=INSECURE_REGISTRY="{% for reg in insecure_registrys %}--insecure-registry={{ reg }} {% endfor %}"
+  when: insecure_registrys is defined and insecure_registrys > 0
+
+- name: write docker.service
+  template: src=docker.service.j2 dest=/usr/lib/systemd/system/docker.service
+
+- name: write /etc/systemd/system/kubelet.service.d directory
+  file: path=/etc/systemd/system/kubelet.service.d  state=directory mode=0755
+
+- name: write kubelet.service file
+  template: src=10-kubeadm.conf.j2 dest=/etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+
+- name: write kubelet.service file
+  template: src=kubelet.service.j2 dest=/usr/lib/systemd/system/kubelet.service
+
+- name: delete /etc/kubernetes/manifests directory
+  file: path=/etc/kubernetes/manifests state=absent
+
+- name: create /etc/kubernetes/manifests directory
+  file: path=/etc/kubernetes/manifests state=directory mode=0755
+
+- name: daemon reload
+  shell: systemctl daemon-reload
+
+- name: start docker
+  service: name=docker state=restarted enabled=yes
+
+- action: shell  netstat -ntlp
+  register: result
+  until: result.stdout.find("2376") != -1
+  retries: 5
+  delay: 10
+
+- name: start kubelet
+  service: name=kubelet state=restarted enabled=yes
+
+#- name: start kube-proxy
+#  service: name=kube-proxy state=restarted enabled=yes
+#

@@ -1,0 +1,3 @@
+- hosts: master1
+  roles:
+    - roleset

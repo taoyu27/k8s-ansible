@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mir2-ui-configmap
+  namespace: {{build_in_namespace}}
+data:
+  config.json: |-
+    {
+      "repository": "{{registry_host}}"
+    }
+

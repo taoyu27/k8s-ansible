@@ -1,0 +1,9 @@
+---
+
+- hosts: kubernetes
+  roles:
+    - docker-lvm
+
+- hosts: registries
+  roles:
+    - docker-lvm

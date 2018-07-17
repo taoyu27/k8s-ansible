@@ -1,0 +1,37 @@
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: mir2-manager-deployment
+  namespace: {{build_in_namespace}}
+spec:
+  replicas: {{ manager_replicas }}
+  template:
+    metadata:
+      labels:
+        app: mir2-manager-deployment-tmpl
+    spec:
+      containers:
+      - name: mir2-manager
+        image: {{ registry_host}}/library/mir2-manager:{{mir2_manager_image_version}}
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+        volumeMounts:
+        - mountPath: "/var/uploadPath"
+          name: upload-volume
+        - mountPath: "/etc/localtime"
+          name: timezone-volume
+        - mountPath: /application.yml
+          subPath: application.yml
+          name: application-config
+      volumes:
+      - name: application-config
+        configMap:
+          name: mir2-manager-configmap
+      - name: timezone-volume
+        hostPath:
+          path: "/etc/localtime"
+      - name: upload-volume
+        persistentVolumeClaim:
+          claimName: upload-pvc

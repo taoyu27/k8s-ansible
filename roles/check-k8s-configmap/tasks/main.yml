@@ -1,0 +1,16 @@
+---
+#check  k8s
+
+
+
+- name: create  test  configmap
+  shell: kubectl create configmap demo-config --from-literal=key1=config1 --from-literal=key2=config2
+  register: configmap_create_result
+  ignore_errors: True
+
+- name: show check info
+  debug: var=configmap_create_result.stdout_lines verbosity=0
+
+- name: delete  test  configmap
+  shell: kubectl delete cm/demo-config
+

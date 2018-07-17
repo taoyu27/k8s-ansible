@@ -1,0 +1,48 @@
+---
+
+# check variables
+- fail: msg="Bailing out. this play requires 'docker_vg_name'"
+  when: docker_vg_name is not defined
+
+- fail: msg="Bailing out. this play requires 'docker_lv_name'"
+  when: docker_lv_name is not defined
+
+
+- fail: msg="Bailing out. this play requires 'docker_data_vol'"
+  when: docker_data_vol is not defined
+
+- name: check docker  lv
+  shell: lvs |grep {{ docker_vg_name }}
+  register: check_docker_lvm
+  ignore_errors: True
+  failed_when: check_docker_lvm.rc == 0
+
+- name: create PV
+  shell: pvcreate  -f {{ docker_data_vol }}
+  when: "'docker_lv' not in check_docker_lvm.stdout"
+
+- name: create VG
+  shell: vgcreate {{ docker_vg_name }} {{ docker_data_vol }}
+  when: "'docker_lv'  not in check_docker_lvm.stdout"
+
+- name: create lv
+  shell: lvcreate -l 100%FREE  -n {{docker_lv_name}} {{ docker_vg_name }}
+  when: "'docker_lv'  not in check_docker_lvm.stdout"
+
+
+- name: format docker disks
+  filesystem: fstype=xfs dev=/dev/{{ docker_vg_name }}/{{docker_lv_name}} opts="-n ftype=1" force=true
+  when: "'docker_lv'  not in check_docker_lvm.stdout"
+
+- name: create /var/lib/docker directory
+  file: path=/var/lib/docker state=directory mode=0755
+  when: "'docker_lv'  not in check_docker_lvm.stdout"
+
+- name: mount docker disks
+  mount:
+    path: /var/lib/docker
+    src: /dev/{{ docker_vg_name }}/{{docker_lv_name}}
+    fstype: xfs
+    opts: "defaults,noatime,nobarrier"
+    state: mounted
+  when: "'docker_lv'  not in check_docker_lvm.stdout"

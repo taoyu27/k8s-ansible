@@ -1,0 +1,25 @@
+
+
+- name: install bind
+  shell: yum -y install bind-utils
+
+# - name: add config file
+#   template: src=config_template.yml dest=/var/named/template
+
+# - name: add configfile
+#   template: src=config_template.yml dest=/var/named/chinacloud.test
+
+# - name: add configfile
+#   template: src=config_template.yml dest=/var/named/chinacloud.dev
+
+
+- name: add several users
+  # debug: msg={{ item.name }}
+  template: src=config_template.yml dest=/var/named/{{ item.name }}
+  with_items:
+    - { name: 'chinacloud.com'}
+    - { name: 'chinacloud.test'}
+    - { name: 'chinacloud.dev'}
+
+- name: modify named.conf
+  template: src=named.conf dest=/etc/named.conf

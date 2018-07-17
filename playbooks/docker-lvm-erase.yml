@@ -1,0 +1,5 @@
+---
+
+- hosts: kubernetes
+  roles:
+    - docker-lvm-erase

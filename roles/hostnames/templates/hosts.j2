@@ -1,0 +1,11 @@
+127.0.0.1   localhost localhost.localdomain
+
+{% for k,v in hostvars.iteritems() %}
+{%   if k=="registry" and "ansible_host" in hostvars[k].keys()  %}
+{{ hostvars[k].ansible_host }}     {{ hostvars[k].ansible_nodename }}  {{ registry_host }}
+{%   else %}
+{%     if "ansible_host" in hostvars[k].keys()  %}
+{{ hostvars[k].ansible_host }}    {{ hostvars[k].ansible_nodename }}
+{%     endif %}
+{%   endif %}
+{% endfor %}

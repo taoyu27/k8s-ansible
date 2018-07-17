@@ -1,0 +1,10 @@
+---
+
+- name:  umount /data
+  shell: umount /data
+
+- name:  remove  Harbor VG
+  shell: vgremove -f harbor_vg
+
+- name: clean fstab
+  shell: sed -i '/^\/dev\/harbor_vg\/harbor_lv .*/d' /etc/fstab

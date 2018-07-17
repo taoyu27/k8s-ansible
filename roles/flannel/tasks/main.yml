@@ -1,0 +1,26 @@
+# check variables
+- fail: msg="Bailing out. this play requires 'registry_host'"
+  when: registry_host is not defined
+
+- fail: msg="Bailing out. this play requires 'registry_port'"
+  when: registry_port is not defined
+
+# tasks
+
+#- name: write flannel.yaml file
+#  template: src=flannel-legacy.yml.j2 dest=/etc/kubernetes/flannel-legacy.yml
+#
+#- name: write flannel-rbac.yaml file
+#  template: src=flannel-rbac.yml.j2 dest=/etc/kubernetes/flannel-rbac.yml
+#
+#- name: create flannel-rbac ClusterRoleBinding
+#  shell: kubectl apply -f /etc/kubernetes/flannel-rbac.yml
+#
+#- name: create flannel components
+#  shell: kubectl apply -f /etc/kubernetes/flannel-legacy.yml
+
+- name: write flannel.yaml file
+  template: src=kube-flannel.yml.j2 dest=/etc/kubernetes/kube-flannel.yml
+
+- name: create flannel components
+  shell: kubectl apply -f /etc/kubernetes/kube-flannel.yml

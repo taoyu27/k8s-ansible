@@ -1,0 +1,35 @@
+---
+- name: check etcd pid
+  shell: ps -ef|grep /bin/etcd|grep -v grep
+  register: ckeck_etcd_result
+  ignore_errors: True
+  failed_when: ckeck_etcd_result.rc == 0
+
+- name: create /opt/etcd_backup/ directory
+  file: path=/opt/etcd_backup/ state=directory mode=0755
+  when: "'/usr/bin/etcd' in ckeck_etcd_result.stdout"
+
+- name: backup old etcd cluster data
+  shell: ETCDCTL_API=3 etcdctl --write-out=table snapshot save /opt/etcd_backup/backup$(date +%Y%m%d_%H%M).db
+  when: "'/usr/bin/etcd' in ckeck_etcd_result.stdout"
+
+- name: create /opt/bin directory
+  file: path=/opt/bin state=directory mode=0755
+
+- name: clean all
+  shell: yum clean all
+
+- name: install etcd
+  shell: yum -y install etcd
+
+- name: copy owner etcd binary
+  copy: src=etcd/ dest=/usr/bin/  mode=0755   backup=yes
+
+- name: wirte etcd service
+  template: src=etcd.service.j2 dest=/etc/systemd/system/etcd.service
+
+- name: daemon reload
+  shell: systemctl daemon-reload
+
+- name: start etcd
+  service: name=etcd state=restarted enabled=yes

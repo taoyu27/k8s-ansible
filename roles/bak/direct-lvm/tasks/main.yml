@@ -1,0 +1,46 @@
+---
+
+# check variables
+- fail: msg="Bailing out. this play requires 'vg_name'"
+  when: vg_name is not defined
+
+- fail: msg="Bailing out. this play requires 'pv_name'"
+  when: pv_name is not defined
+
+- name: check docker PV
+  shell: lvs |grep {{ vg_name }}
+  register: check_pv
+  ignore_errors: True
+  failed_when: check_pv.rc == 0
+
+- name: create PV
+  shell: pvcreate  -f {{ pv_name }}
+  when: "'docker' not in check_pv.stdout"
+
+- name: create VG
+  shell: vgcreate {{ vg_name }} {{ pv_name }}
+  when: "'docker' not in check_pv.stdout"
+
+- name: create thinpool
+  shell: lvcreate --wipesignatures y -n {{ thinpool_name }} {{ vg_name }} -l 95%VG
+  when: "'docker' not in check_pv.stdout"
+
+- name: create thinpoolmeta
+  shell: lvcreate --wipesignatures y -n {{ thinpoolmeta_name }} {{ vg_name }} -l 1%VG
+  when: "'docker' not in check_pv.stdout"
+
+- name:   Convert the pool to a thin pool.
+  shell: lvconvert -y --zero n -c 512K --thinpool {{ vg_name }}/{{ thinpool_name }} --poolmetadata {{ vg_name }}/{{ thinpoolmeta_name }}
+  when: "'docker' not in check_pv.stdout"
+
+- name: write docker-thinpool.profile file
+  template: src=docker-thinpool.profile dest=/etc/lvm/profile/{{ vg_name }}-{{ thinpool_name }}.profile
+  when: "'docker' not in check_pv.stdout"
+
+- name: Apply your new lvm profile
+  shell: lvchange --metadataprofile {{ vg_name }}-{{ thinpool_name }} {{ vg_name }}/{{ thinpool_name }}
+  when: "'docker' not in check_pv.stdout"
+
+- name: Verify the lv is monitored.
+  shell: lvs -o+seg_monitor
+  when: "'docker' not in check_pv.stdout"

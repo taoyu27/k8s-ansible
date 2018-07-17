@@ -1,0 +1,4 @@
+[mir2]
+name=mir2-stable
+baseurl=http://{% if reposerver %}{{ reposerver }}{% else %}{{ hostvars[groups['registries'][0]]['ansible_host']}}{% endif %}:82/latest/
+gpgcheck=0

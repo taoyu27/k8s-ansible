@@ -1,0 +1,50 @@
+# before your start, you must download the helm client from github: https://github.com/kubernetes/helm/releases
+# you have to down load the tiller image from the gcr.io firstly, if you can not access the google
+# and, push the tiller image into your local registry. you can indicat the registry path of image when you 
+# start the helm init
+
+- name: clear all file
+  shell: rm -rf /tmp/mongodb
+
+- name: create /tmp/mongodb directory
+  file: path=/tmp/mongodb state=directory mode=0755
+
+- name: write mongo configmap init file
+  template: src=mongo-configmap-init.yml.j2 dest=/tmp/mongodb/mongo-configmap-init.yml
+
+- name: write mongo pv file
+  template: src=mongo-pv.yml.j2 dest=/tmp/mongodb/mongo-pv.yml
+
+- name: write mongo pvc file
+  template: src=mongo-pvc.yml.j2 dest=/tmp/mongodb/mongo-pvc.yml
+
+- name: write k8s file
+  template: src=mongo-k8s.yml.j2 dest=/tmp/mongodb/mongo-k8s.yml
+
+- name: write ceph secret file
+  template: src=ceph-secret.yml.j2 dest=/tmp/mongodb/ceph-secret.yml
+
+- name: write built-in build-in-namespace file
+  template: src=build-in-namespace.yml.j2 dest=/tmp/mongodb/build-in-namespace.yml
+
+
+- name: create built-in namespace
+  shell: kubectl apply -f /tmp/mongodb/build-in-namespace.yml
+
+- name: create  ceph-secret 
+  shell: kubectl apply -f /tmp/mongodb/ceph-secret.yml
+
+- name: create  configmap 
+  shell: kubectl apply -f /tmp/mongodb/mongo-configmap-init.yml
+
+- name: create  pv 
+  shell: kubectl apply -f /tmp/mongodb/mongo-pv.yml
+
+- name: create  pvc
+  shell: kubectl apply -f /tmp/mongodb/mongo-pvc.yml
+
+- name: create mongo-k8s
+  shell: kubectl apply -f /tmp/mongodb/mongo-k8s.yml
+
+
+
